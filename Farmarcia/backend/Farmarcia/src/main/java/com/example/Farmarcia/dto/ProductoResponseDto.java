@@ -5,6 +5,9 @@ import java.time.LocalDate;
 
 import com.example.Farmarcia.entity.StorageType;
 
+import lombok.Data;
+
+@Data
 public class ProductoResponseDto {
 
     private Long id;

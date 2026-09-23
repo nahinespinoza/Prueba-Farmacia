@@ -54,7 +54,29 @@ public class ProductoService {
 
     // Actualizar por id
 
+    public ProductoResponseDto actualizar(Long id, ProductoRequestDto request) {
+        ProductoEntity producto = productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        producto.setName(request.getNombre());
+        producto.setActiveIngredient(request.getIngredienteActivo());
+        producto.setStorageType(request.getTipoAlmacenamiento());
+        producto.setExpirationDate(request.getFechaVencimiento());
+        producto.setPrice(request.getPrecio());
+        producto.setStock(request.getStock());
+        producto.setRequiresPrescription(request.getRequiereReceta());
+
+        ProductoEntity actualizado = productoRepository.save(producto);
+        return mapToResponse(actualizado);
+    }
+
     // Borrar por id
+
+    public void eliminar(Long id) {
+        ProductoEntity producto = productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        productoRepository.delete(producto);
+    }
 
     // Obtener por categoria
 
@@ -95,9 +117,17 @@ public class ProductoService {
     // Mapeo por hacer
 
     private ProductoResponseDto mapToResponse(ProductoEntity producto) {
-        // Mapeo
+        ProductoResponseDto response = new ProductoResponseDto();
+        response.setId(producto.getId());
+        response.setNombre(producto.getName());
+        response.setIngredienteActivo(producto.getActiveIngredient());
+        response.setTipoAlmacenamiento(producto.getStorageType());
+        response.setFechaVencimiento(producto.getExpirationDate());
+        response.setPrecio(producto.getPrice());
+        response.setStock(producto.getStock());
+        response.setRequiereReceta(producto.getRequiresPrescription());
 
-        return null;
+        return response;
 
     }
 
