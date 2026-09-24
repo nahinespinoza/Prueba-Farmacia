@@ -43,4 +43,6 @@ public class VentaEntity {
 
     @Column(name = "sale_date", nullable = false)
     private LocalDateTime saleDate = LocalDateTime.now();
+
+    
 }

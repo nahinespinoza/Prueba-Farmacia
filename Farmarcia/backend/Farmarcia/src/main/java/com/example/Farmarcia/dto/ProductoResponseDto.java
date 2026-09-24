@@ -5,9 +5,13 @@ import java.time.LocalDate;
 
 import com.example.Farmarcia.entity.StorageType;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductoResponseDto {
 
     private Long id;

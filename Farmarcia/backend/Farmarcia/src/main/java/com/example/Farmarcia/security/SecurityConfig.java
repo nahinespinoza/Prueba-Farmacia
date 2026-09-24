@@ -40,8 +40,8 @@ public class SecurityConfig {
                                                                                    // peticioness
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
-                                "/products/**")
+                        .requestMatchers("/auth/register", "/auth/login", "/v3/api-docs/**", "/swagger-ui/**",
+                                "/swagger-ui.html", "/products/**")
                         .permitAll()
                         
                         // Resto autenticado
