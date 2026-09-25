@@ -2,6 +2,7 @@ package com.example.Farmarcia.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,8 +11,11 @@ import org.springframework.stereotype.Service;
 import com.example.Farmarcia.dto.VentaRequestDto;
 import com.example.Farmarcia.dto.VentaResponseDto;
 import com.example.Farmarcia.entity.ProductoEntity;
+import com.example.Farmarcia.entity.Role;
 import com.example.Farmarcia.entity.UsuarioEntity;
 import com.example.Farmarcia.entity.VentaEntity;
+import com.example.Farmarcia.exception.BusinessException;
+import com.example.Farmarcia.exception.ResourceNotFoundException;
 import com.example.Farmarcia.repository.ProductoRepository;
 import com.example.Farmarcia.repository.UsuarioRepository;
 import com.example.Farmarcia.repository.VentaRepository;
@@ -35,19 +39,19 @@ public class VentaService {
     @Transactional
     public VentaResponseDto registrarVenta(VentaRequestDto venta) {
 
-        //Valida si existe el producto
+        // Valida si existe el producto
         ProductoEntity producto = productoRepository.findById(venta.getProductoId())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
         // Sistema no permite que venda si esta vencido
         if (producto.getExpirationDate().isBefore(LocalDate.now())) {
-            throw new RuntimeException("El producto ya está vencido");
-        
+            throw new BusinessException("El producto ya está vencido");
+
         }
 
         // Sistema no permite que venda si no hay stock
         if (producto.getStock() < venta.getCantidad()) {
-            throw new RuntimeException("No hay suficiente stock disponible");
+            throw new BusinessException("No hay suficiente stock disponible");
         }
 
         producto.setStock(producto.getStock() - venta.getCantidad());
@@ -74,8 +78,24 @@ public class VentaService {
 
     public VentaResponseDto obtenerVentaPorId(Long id) {
         VentaEntity venta = ventaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Venta no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Venta no encontrada"));
         return mapToResponse(venta);
+    }
+
+    public List<VentaResponseDto> listarVentas() {
+        // Obtener usuario autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        UsuarioEntity usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        List<VentaEntity> ventas;
+        if (usuario.getRole() == Role.ADMIN) {
+            ventas = ventaRepository.findAll();
+        } else {
+            ventas = ventaRepository.findBySoldById(usuario.getId());
+        }
+        return ventas.stream().map(this::mapToResponse).toList();
     }
 
     private VentaResponseDto mapToResponse(VentaEntity venta) {

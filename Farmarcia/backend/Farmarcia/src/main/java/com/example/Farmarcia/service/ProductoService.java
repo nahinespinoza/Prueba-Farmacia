@@ -10,6 +10,7 @@ import com.example.Farmarcia.dto.ProductoRequestDto;
 import com.example.Farmarcia.dto.ProductoResponseDto;
 import com.example.Farmarcia.entity.ProductoEntity;
 import com.example.Farmarcia.entity.StorageType;
+import com.example.Farmarcia.exception.ResourceNotFoundException;
 import com.example.Farmarcia.repository.ProductoRepository;
 
 @Service
@@ -34,7 +35,7 @@ public class ProductoService {
 
     public ProductoResponseDto obtenerPorId(Long id) {
         ProductoEntity producto = productoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
         return mapToResponse(producto);
     }
 
@@ -56,8 +57,7 @@ public class ProductoService {
 
     public ProductoResponseDto actualizar(Long id, ProductoRequestDto request) {
         ProductoEntity producto = productoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
         producto.setName(request.getNombre());
         producto.setActiveIngredient(request.getIngredienteActivo());
         producto.setStorageType(request.getTipoAlmacenamiento());
@@ -74,7 +74,7 @@ public class ProductoService {
 
     public void eliminar(Long id) {
         ProductoEntity producto = productoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado"));
         productoRepository.delete(producto);
     }
 

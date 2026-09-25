@@ -6,13 +6,15 @@ import com.example.Farmarcia.dto.RegisterRequestDto;
 import com.example.Farmarcia.dto.UsarioResponseDto;
 import com.example.Farmarcia.entity.Role;
 import com.example.Farmarcia.entity.UsuarioEntity;
+import com.example.Farmarcia.exception.BusinessException;
+import com.example.Farmarcia.exception.ResourceNotFoundException;
 import com.example.Farmarcia.repository.UsuarioRepository;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Service 
+@Service
 public class AutenticacionService {
 
     private final UsuarioRepository usuarioRepository;
@@ -21,21 +23,21 @@ public class AutenticacionService {
     public AutenticacionService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
-    }  
+    }
 
     public UsuarioEntity crearUsuario(RegisterRequestDto dto) {
         // Verificar si el correo ya está registrado
         if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("El correo ya está registrado");
+            throw new BusinessException("El correo ya está registrado");
         }
-        
+
         UsuarioEntity usuario = new UsuarioEntity();
         usuario.setName(dto.getNombre());
         usuario.setEmail(dto.getEmail());
         usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
 
         // Asignar Rol de Cliente por defecto
-        if(dto.getRol() != Role.ADMIN || dto.getRol() == null) {    
+        if (dto.getRol() != Role.ADMIN || dto.getRol() == null) {
             usuario.setRole(Role.USER);
         } else {
             usuario.setRole(Role.ADMIN);
@@ -43,7 +45,7 @@ public class AutenticacionService {
         return usuarioRepository.save(usuario);
     }
 
-    //devolver info del usuario logeado
+    // devolver info del usuario logeado
 
     public UsarioResponseDto obtenerUsuarioLogeado() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -53,7 +55,7 @@ public class AutenticacionService {
         }
 
         UsuarioEntity usuario = usuarioRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         UsarioResponseDto response = new UsarioResponseDto();
         response.setId(usuario.getId());

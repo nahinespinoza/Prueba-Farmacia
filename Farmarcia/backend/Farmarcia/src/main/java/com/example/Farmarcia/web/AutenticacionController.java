@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
@@ -41,7 +42,7 @@ public class AutenticacionController {
             @ApiResponse(responseCode = "400", description = "Solicitud inválida")
     })
     @PostMapping("/register")
-    public ResponseEntity<UsuarioEntity> crearUsuario(@RequestBody RegisterRequestDto user) {
+    public ResponseEntity<UsuarioEntity> crearUsuario(@Valid @RequestBody RegisterRequestDto user) {
         UsuarioEntity nuevoUsuario = autenticacionService.crearUsuario(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
@@ -52,7 +53,7 @@ public class AutenticacionController {
             @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> iniciarSesion(@RequestBody LoginRequestDto loginRequest) {
+    public ResponseEntity<LoginResponseDto> iniciarSesion(@Valid @RequestBody LoginRequestDto loginRequest) {
         return ResponseEntity.ok(authService.login(loginRequest));
     }
 

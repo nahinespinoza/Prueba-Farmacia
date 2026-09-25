@@ -1,5 +1,7 @@
 package com.example.Farmarcia.web;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/sales")
@@ -37,7 +40,7 @@ public class VentaController {
             @ApiResponse(responseCode = "400", description = "Venta no válida")
     })
     @PostMapping
-    public ResponseEntity<VentaResponseDto> crearVenta(@RequestBody VentaRequestDto venta) {
+    public ResponseEntity<VentaResponseDto> crearVenta(@Valid @RequestBody VentaRequestDto venta) {
         VentaResponseDto nuevaVenta = ventaService.registrarVenta(venta);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevaVenta);
     }
@@ -51,6 +54,16 @@ public class VentaController {
     public ResponseEntity<VentaResponseDto> obtenerVentaPorId(@PathVariable Long id) {
         VentaResponseDto venta = ventaService.obtenerVentaPorId(id);
         return ResponseEntity.ok(venta);
+    }
+
+    @Operation(summary = "Listar todas las ventas", description = "Lista todas las ventas registradas")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ventas encontradas"),
+            @ApiResponse(responseCode = "404", description = "Ventas no encontradas")
+    })
+    @GetMapping
+    public ResponseEntity<List<VentaResponseDto>> listarVentas() {
+        return ResponseEntity.ok(ventaService.listarVentas());
     }
 
 }

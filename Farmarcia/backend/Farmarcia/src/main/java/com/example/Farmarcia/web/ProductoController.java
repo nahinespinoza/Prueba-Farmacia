@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/products")
@@ -61,7 +62,7 @@ public class ProductoController {
             @ApiResponse(responseCode = "400", description = "Solicitud inválida")
     })
     @PostMapping
-    public ResponseEntity<ProductoResponseDto> crearPedido(@RequestBody ProductoRequestDto pedido) {
+    public ResponseEntity<ProductoResponseDto> crearPedido(@Valid @RequestBody ProductoRequestDto pedido) {
         ProductoResponseDto nuevoPedido = productoService.crear(pedido);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoPedido);
     }
@@ -72,7 +73,7 @@ public class ProductoController {
             @ApiResponse(responseCode = "404", description = "Pedidos no encontrados")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoResponseDto> actualizarPorId(@PathVariable Long id,
+    public ResponseEntity<ProductoResponseDto> actualizarPorId(@Valid @PathVariable Long id,
             @RequestBody ProductoRequestDto request) {
         return ResponseEntity.ok(productoService.actualizar(id, request));
     }

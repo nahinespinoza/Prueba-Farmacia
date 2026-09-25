@@ -2,6 +2,7 @@ package com.example.Farmarcia.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -40,11 +41,32 @@ public class SecurityConfig {
                                                                                    // peticioness
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login", "/v3/api-docs/**", "/swagger-ui/**",
-                                "/swagger-ui.html", "/products/**")
+                        // Públicos
+                        .requestMatchers(
+                                "/auth/register",
+                                "/auth/login",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html")
                         .permitAll()
-                        
-                        // Resto autenticado
+
+                        // Productos vencidos: ADMIN
+                        .requestMatchers(HttpMethod.GET, "/products/expired").hasRole("ADMIN")
+
+                        // Lectura de productos: autenticado
+                        .requestMatchers(HttpMethod.GET, "/products/**").authenticated()
+
+                        // Escritura de productos: ADMIN
+                        .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
+
+                        // Registrar venta: USER
+                        .requestMatchers(HttpMethod.POST, "/sales").hasRole("USER")
+
+                        // Consultar ventas: autenticado o ADMIN/USER
+                        .requestMatchers(HttpMethod.GET, "/sales", "/sales/**").authenticated()
+
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
@@ -72,11 +94,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Orígenes del front (Vite)
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"));
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("Authorization"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

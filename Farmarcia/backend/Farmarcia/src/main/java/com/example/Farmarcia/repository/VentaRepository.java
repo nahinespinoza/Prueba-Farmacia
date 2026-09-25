@@ -9,5 +9,4 @@ import com.example.Farmarcia.entity.VentaEntity;
 public interface VentaRepository extends JpaRepository<VentaEntity, Long> {
 
     List<VentaEntity> findBySoldById(Long userId);
-
 }
